@@ -26,5 +26,4 @@ module router_test_top;
         SystemClock = ~SystemClock;
     end
   end
-
 endmodule
