@@ -1,32 +1,34 @@
+`timescale 1ns/100ps
 `ifndef INC_RECEIVER_SV
 `define INC_RECEIVER_SV
 `include "ReceiverBase.sv"
+
 class Receiver extends ReceiverBase;
   pkt_mbox out_box;	// Scoreboard mailbox
 
   extern function new(string name = "Receiver", int port_id, pkt_mbox out_box, virtual router_io.TB rtr_io);
   extern virtual task start();
-endclass
+endclass:Receiver
 
 function Receiver::new(string name, int port_id, pkt_mbox out_box, virtual router_io.TB rtr_io);
   super.new(name, rtr_io);
-  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, name);
+  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, this.name);
   this.da = port_id;
   this.out_box = out_box;
-endfunction
+endfunction:new
 
 task Receiver::start();
-  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, name);
+  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, this.name);
   fork
     forever begin
-      recv();
+      this.recv();
       begin
-        Packet pkt = new pkt2cmp;
-        out_box.put(pkt);
+        Packet pkt = new this.pkt2cmp;
+        this.out_box.put(pkt);
       end
     end
   join_none
-endtask
+endtask:start
 `endif
 
     
