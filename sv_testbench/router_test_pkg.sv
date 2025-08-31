@@ -1,3 +1,4 @@
+`timescale 1ns/100ps
 package router_test_pkg;
 
 int run_for_n_packets = 0;
