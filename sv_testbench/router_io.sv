@@ -1,3 +1,4 @@
+`timescale 1ns/100ps
 interface router_io(input bit clock);
   logic		reset_n;
   logic [15:0]	din;
@@ -9,7 +10,7 @@ interface router_io(input bit clock);
   logic [15:0]	frameo_n;
 
   clocking cb @(posedge clock);
-    default input #1 output #1;
+    default input #1ns output #1ns;
     output reset_n;
     output din;
     output frame_n;
@@ -18,7 +19,7 @@ interface router_io(input bit clock);
     input valido_n;
     input busy_n;
     input frameo_n;
-  endclocking
+  endclocking:cb
 
   modport TB(clocking cb, output reset_n);
-endinterface
+endinterface:router_io
