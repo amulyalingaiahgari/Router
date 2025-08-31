@@ -1,5 +1,7 @@
+`timesacle 1ns/100ps
 `ifndef INC_GENERATOR_SV
 `define INC_GENERATOR_SV
+
 class Generator;
   string  name;		// unique identifier
   Packet  pkt2send;	// stimulus Packet object
@@ -8,7 +10,7 @@ class Generator;
   extern function new(string name = "Generator");
   extern virtual task gen();
   extern virtual task start();
-endclass
+endclass: Generator
 
 function Generator::new(string name);
   if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, name);
@@ -17,28 +19,28 @@ function Generator::new(string name);
   this.out_box = new[16];
   foreach(this.out_box[i])
     this.out_box[i] = new();
-endfunction
+endfunction:new
 
 task Generator::gen();
   static int pkts_generated = 0;
-  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, name);
-  pkt2send.name = $psprintf("Packet[%0d]", pkts_generated++);
-  if (!pkt2send.randomize()) begin
+  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, this.name);
+  this.pkt2send.name = $sformatf("Packet[%0d]", pkts_generated++);
+  if (!this.pkt2send.randomize()) begin
     $display("\n%m\n[ERROR]%t Randomization Failed!\n", $realtime);
     $finish;
   end
-endtask
+endtask:gen
 
 task Generator::start();
-  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, name);
+  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, this.name);
   fork
     for (int i=0; i<run_for_n_packets || run_for_n_packets <= 0; i++) begin
-      gen();
+      this.gen();
       begin
-        Packet pkt = new pkt2send;
-        out_box[pkt.sa].put(pkt);
+        Packet pkt = new this.pkt2send;
+        this.out_box[pkt.sa].put(pkt);
       end
     end
   join_none
-endtask
+endtask:start
 `endif
