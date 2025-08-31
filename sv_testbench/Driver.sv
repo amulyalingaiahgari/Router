@@ -1,6 +1,8 @@
+`timescale 1ns/100ps
 `ifndef INC_DRIVER_SV
 `define INC_DRIVER_SV
 `include "DriverBase.sv"
+
 class Driver extends DriverBase;
   pkt_mbox in_box;	// Generator mailbox
   pkt_mbox out_box;	// Scoreboard mailbox
@@ -8,32 +10,32 @@ class Driver extends DriverBase;
 
   extern function new(string name = "Driver", int port_id, semaphore sem[], pkt_mbox in_box, out_box, virtual router_io.TB rtr_io);
   extern virtual task start();
-endclass
+endclass:Driver
 
 function Driver::new(string name, int port_id, semaphore sem[], pkt_mbox in_box, out_box, virtual router_io.TB rtr_io);
   super.new(name, rtr_io);
-  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, name);
+  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, this.name);
   this.sa = port_id;
   this.sem = sem;
   this.in_box = in_box;
   this.out_box = out_box;
-endfunction
+endfunction:new
 
 task Driver::start();
-  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, name);
+  if (TRACE_ON) $display("[TRACE]%t %s:%m", $realtime, this.name);
   fork
     forever begin
-      in_box.get(pkt2send);
-      if (pkt2send.sa != this.sa) continue;
-      this.da = pkt2send.da;
-      this.payload = pkt2send.payload;
-      sem[this.da].get(1);
-      send();
-      out_box.put(pkt2send);
-      sem[this.da].put(1);
+      this.in_box.get(this.pkt2send);
+      if (this.pkt2send.sa != this.sa) continue;
+      this.da = this.pkt2send.da;
+      this.payload = this.pkt2send.payload;
+      this.sem[this.da].get(1);
+      this.send();
+      this.out_box.put(this.pkt2send);
+      this.sem[this.da].put(1);
     end
   join_none
-endtask
+endtask:start
 `endif
 
 
