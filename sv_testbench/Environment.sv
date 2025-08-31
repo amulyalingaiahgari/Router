@@ -1,3 +1,5 @@
+`timescale 1ns/100ps
+
 class Environment;
   string name;
   rand int run_for_n_packets;	// number of packets to test
@@ -53,9 +55,9 @@ function void Environment::build();
     this.sb = new();
     foreach (sem[i])
       this.sem[i] = new(1);
-    for (int i=0; i<drvr.size(); i++)
+	for (int i=0; i<drvr.size(); i++) //foreach (drvr[i])
       this.drvr[i] = new($psprintf("drvr[%0d]", i), i, this.sem, this.gen.out_box[i], this.sb.driver_mbox, this.rtr_io);
-    for (int i=0; i<rcvr.size(); i++)
+	for (int i=0; i<rcvr.size(); i++) //foreach (rcvr[i])
       this.rcvr[i] = new($psprintf("rcvr[%0d]", i), i, this.sb.receiver_mbox, this.rtr_io);
 endfunction: build
 
@@ -64,8 +66,7 @@ task Environment::reset();
   this.rtr_io.reset_n <= 1'b0;
   this.rtr_io.cb.frame_n <= '1;
   this.rtr_io.cb.valid_n <= '1;
-  #2;
-  this.rtr_io.reset_n <= 1'b1;
+  ##2 this.rtr_io.reset_n <= 1'b1;
   repeat(15) @(this.rtr_io.cb);
 endtask: reset
 
